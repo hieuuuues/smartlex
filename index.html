@@ -908,10 +908,11 @@
         getFirestore,
         doc,
         setDoc,
+        getDoc,
         serverTimestamp,
       } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-      // Your web app's Firebase configuration
+      // Firebase configuration
       const firebaseConfig = {
         apiKey: "AIzaSyDr7ySnNfcgB2b2u2tPZLc5L4l1FGdjX4A",
         authDomain: "login-81d5f.firebaseapp.com",
@@ -927,9 +928,6 @@
       const db = getFirestore(app);
 
       // DOM Elements
-      const hamburger = document.querySelector(".hamburger");
-      const mobileMenu = document.querySelector(".mobile-menu");
-      const overlay = document.querySelector(".overlay");
       const signInButton = document.getElementById("signInButton");
       const mobileSignIn = document.getElementById("mobileSignIn");
       const userInfo = document.getElementById("userInfo");
@@ -938,14 +936,19 @@
       const logoutButton = document.getElementById("logoutButton");
 
       // Kiểm tra trạng thái đăng nhập
-      onAuthStateChanged(auth, (user) => {
+      onAuthStateChanged(auth, async (user) => {
         if (user) {
           signInButton.style.display = "none";
           mobileSignIn.style.display = "none";
           userInfo.style.display = "flex";
           userAvatar.src = user.photoURL || "https://placehold.co/32x32";
           userName.textContent = user.displayName || "Người dùng";
-          saveUserData(user);
+
+          // Lưu hoặc cập nhật dữ liệu người dùng
+          await saveUserData(user);
+
+          // Lấy dữ liệu từ Firestore và hiển thị
+          await loadUserData(user.uid);
         } else {
           signInButton.style.display = "block";
           mobileSignIn.style.display = "flex";
@@ -954,7 +957,7 @@
       });
 
       // Đăng nhập với Google
-      signInButton.addEventListener("click", () => {
+      function signInWithGoogle() {
         const provider = new GoogleAuthProvider();
         signInWithPopup(auth, provider)
           .then((result) => {
@@ -964,20 +967,10 @@
           .catch((error) => {
             alert("Lỗi đăng nhập: " + error.message);
           });
-      });
+      }
 
-      mobileSignIn.addEventListener("click", (e) => {
-        e.preventDefault();
-        const provider = new GoogleAuthProvider();
-        signInWithPopup(auth, provider)
-          .then((result) => {
-            const user = result.user;
-            alert(`Đăng nhập thành công! Xin chào ${user.displayName}`);
-          })
-          .catch((error) => {
-            alert("Lỗi đăng nhập: " + error.message);
-          });
-      });
+      signInButton.addEventListener("click", signInWithGoogle);
+      mobileSignIn.addEventListener("click", signInWithGoogle);
 
       // Đăng xuất
       logoutButton.addEventListener("click", () => {
@@ -991,52 +984,40 @@
       });
 
       // Lưu dữ liệu người dùng vào Firestore
-      function saveUserData(user) {
-        setDoc(doc(db, "users", user.uid), {
-          name: user.displayName,
-          email: user.email,
-          photoURL: user.photoURL,
-          lastLogin: serverTimestamp(),
-        }).catch((error) => {
-          console.error("Lỗi lưu dữ liệu: ", error);
-        });
-      }
-
-      // Toggle Menu
-      function toggleMenu() {
-        hamburger.classList.toggle("active");
-        mobileMenu.classList.toggle("active");
-        overlay.classList.toggle("active");
-      }
-
-      hamburger.addEventListener("click", toggleMenu);
-      overlay.addEventListener("click", toggleMenu);
-
-      const mobileNavLinks = document.querySelectorAll(".mobile-nav-links a");
-      mobileNavLinks.forEach((link) => {
-        link.addEventListener("click", toggleMenu);
-      });
-
-      window.addEventListener("resize", () => {
-        if (window.innerWidth > 768) {
-          hamburger.classList.remove("active");
-          mobileMenu.classList.remove("active");
-          overlay.classList.remove("active");
-        }
-      });
-
-      // Vocab Trial
-      const trialButton = document.querySelector(".vocab-trial button");
-      trialButton.addEventListener("click", () => {
-        const input = document.querySelector(".vocab-trial input").value;
-        if (input) {
-          alert(
-            `Bạn vừa tra từ: "${input}". Hãy đăng ký để khám phá nghĩa và cách dùng!`
+      async function saveUserData(user) {
+        try {
+          await setDoc(
+            doc(db, "users", user.uid),
+            {
+              name: user.displayName,
+              email: user.email,
+              photoURL: user.photoURL,
+              lastLogin: serverTimestamp(),
+            },
+            { merge: true }
           );
-        } else {
-          alert("Vui lòng nhập một từ để tra!");
+
+          console.log("Dữ liệu đã được cập nhật!");
+        } catch (error) {
+          console.error("Lỗi lưu dữ liệu:", error);
         }
-      });
+      }
+
+      // Đọc dữ liệu người dùng từ Firestore
+      async function loadUserData(userId) {
+        try {
+          const userRef = doc(db, "users", userId);
+          const userSnap = await getDoc(userRef);
+
+          if (userSnap.exists()) {
+            console.log("Dữ liệu Firestore:", userSnap.data());
+          } else {
+            console.log("Không tìm thấy dữ liệu trong Firestore!");
+          }
+        } catch (error) {
+          console.error("Lỗi tải dữ liệu:", error);
+        }
+      }
     </script>
   </body>
 </html>
