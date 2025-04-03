@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Lex - Học Từ Vựng Thông Minh</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary-color: #60a5fa;
+        --secondary-color: #2563eb;
+        --background: #f0f4f8;
+        --card-bg: #ffffff;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --shadow: 0 6px 25px rgba(0, 0, 0, 0.06);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+
+      body {
+        background: var(--background);
+        color: var(--text-primary);
+        line-height: 1.6;
+      }
+
+      .header {
+        background: var(--card-bg);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: var(--shadow);
+      }
+
+      .nav-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1.2rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      .logo img {
+        width: 42px;
+      }
+
+      .logo-text {
+        font-size: 1.9rem;
+        font-weight: 700;
+        color: var(--primary-color);
+      }
+
+      .nav-menu {
+        display: flex;
+        gap: 2.5rem;
+        align-items: center;
+      }
+
+      .nav-menu a {
+        text-decoration: none;
+        color: var(--text-primary);
+        font-weight: 400;
+        font-size: 1.1rem;
+        padding: 0.6rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: color 0.3s;
+      }
+
+      .nav-menu a i {
+        font-size: 1.2rem;
+        color: var(--primary-color);
+      }
+
+      .nav-menu a:hover {
+        color: var(--primary-color);
+      }
+
+      .nav-cta {
+        background: var(--primary-color);
+        color: var(--card-bg);
+        padding: 0.7rem 1.8rem;
+        border-radius: 30px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .nav-cta:hover {
+        background: var(--secondary-color);
+      }
+
+      .hamburger {
+        display: none;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        position: relative;
+      }
+
+      .hamburger span {
+        position: absolute;
+        width: 30px;
+        height: 3px;
+        background: var(--primary-color);
+        border-radius: 3px;
+        transition: all 0.3s ease;
+      }
+
+      .hamburger span:nth-child(1) {
+        top: 12px;
+        left: 5px;
+      }
+
+      .hamburger span:nth-child(2) {
+        top: 18px;
+        left: 5px;
+      }
+
+      .hamburger span:nth-child(3) {
+        top: 24px;
+        left: 5px;
+      }
+
+      .hamburger.active span:nth-child(1) {
+        transform: rotate(45deg);
+        top: 18px;
+      }
+
+      .hamburger.active span:nth-child(2) {
+        opacity: 0;
+      }
+
+      .hamburger.active span:nth-child(3) {
+        transform: rotate(-45deg);
+        top: 18px;
+      }
+
+      .mobile-menu {
+        display: none;
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 320px;
+        height: 100vh;
+        background: var(--card-bg);
+        padding: 5rem 2rem;
+        transition: right 0.3s ease;
+        z-index: 1000;
+        box-shadow: var(--shadow);
+      }
+
+      .mobile-menu.active {
+        right: 0;
+      }
+
+      .mobile-nav-links {
+        display: flex;
+        flex-direction: column;
+        gap: 1.8rem;
+      }
+
+      .mobile-nav-links a {
+        color: var(--text-primary);
+        text-decoration: none;
+        font-size: 1.2rem;
+        padding: 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .mobile-nav-links a i {
+        font-size: 1.3rem;
+        color: var(--primary-color);
+      }
+
+      .mobile-nav-links a:hover {
+        color: var(--primary-color);
+      }
+
+      .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+      }
+
+      .overlay.active {
+        display: block;
+      }
+
+      .hero {
+        max-width: 1400px;
+        margin: 5rem auto;
+        padding: 0 2rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        align-items: center;
+      }
+
+      .hero-text h1 {
+        font-size: 3.2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+      }
+
+      .hero-text p {
+        font-size: 1.3rem;
+        color: var(--text-secondary);
+        margin-bottom: 2.5rem;
+        max-width: 550px;
+      }
+
+      .hero-buttons {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .btn {
+        padding: 0.9rem 2.5rem;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+
+      .btn-primary {
+        background: var(--primary-color);
+        color: var(--card-bg);
+      }
+
+      .btn-primary:hover {
+        background: var(--secondary-color);
+      }
+
+      .btn-secondary {
+        background: transparent;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+      }
+
+      .btn-secondary:hover {
+        background: var(--primary-color);
+        color: var(--card-bg);
+      }
+
+      .hero-image img {
+        width: 100%;
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+      }
+
+      .vocab-trial {
+        background: var(--card-bg);
+        padding: 1.5rem;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        max-width: 500px;
+      }
+
+      .vocab-trial h3 {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+      }
+
+      .vocab-trial input {
+        width: 70%;
+        padding: 0.8rem;
+        border: 1px solid var(--primary-color);
+        border-radius: 10px 0 0 10px;
+        font-size: 1rem;
+        outline: none;
+      }
+
+      .vocab-trial button {
+        padding: 0.8rem 1.5rem;
+        border: none;
+        background: var(--primary-color);
+        color: var(--card-bg);
+        border-radius: 0 10px 10px 0;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.3s;
+      }
+
+      .vocab-trial button:hover {
+        background: var(--secondary-color);
+      }
+
+      .section {
+        max-width: 1400px;
+        margin: 6rem auto;
+        padding: 0 2rem;
+      }
+
+      .section h2 {
+        font-size: 2.8rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        text-align: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .section p.subtitle {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        text-align: center;
+        margin-bottom: 3.5rem;
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2.5rem;
+      }
+
+      .feature-card {
+        background: var(--card-bg);
+        padding: 2.5rem;
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+        text-align: center;
+      }
+
+      .feature-card i {
+        font-size: 3rem;
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+      }
+
+      .feature-card h3 {
+        font-size: 1.6rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+      }
+
+      .feature-card p {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+      }
+
+      .roadmap-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2.5rem;
+        justify-content: center;
+      }
+
+      .roadmap-item {
+        flex: 1 1 320px;
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+        position: relative;
+      }
+
+      .roadmap-item::before {
+        content: "";
+        position: absolute;
+        top: 25px;
+        left: -15px;
+        width: 25px;
+        height: 25px;
+        background: var(--primary-color);
+        border-radius: 50%;
+      }
+
+      .roadmap-item h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+      }
+
+      .progress-demo {
+        background: var(--card-bg);
+        padding: 3rem;
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+        text-align: center;
+      }
+
+      .progress-demo img {
+        max-width: 100%;
+        border-radius: 10px;
+        margin-top: 2rem;
+      }
+
+      .testimonials-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2.5rem;
+      }
+
+      .testimonial-card {
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+      }
+
+      .testimonial-card p {
+        font-style: italic;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+      }
+
+      .testimonial-card h4 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--primary-color);
+      }
+
+      .cta-section {
+        background: var(--primary-color);
+        color: var(--card-bg);
+        text-align: center;
+        padding: 5rem 2rem;
+        border-radius: 20px;
+        margin: 6rem 2rem;
+      }
+
+      .cta-section h2 {
+        color: var(--card-bg);
+        font-size: 2.5rem;
+      }
+
+      .cta-section p {
+        color: var(--card-bg);
+        font-size: 1.2rem;
+        margin-bottom: 2.5rem;
+      }
+
+      .cta-section .btn {
+        background: var(--card-bg);
+        color: var(--primary-color);
+        padding: 1rem 3rem;
+      }
+
+      .cta-section .btn:hover {
+        background: #f0f0f0;
+      }
+
+      .footer {
+        background: var(--card-bg);
+        padding: 5rem 2rem;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      .footer-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 3rem;
+      }
+
+      .footer h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.2rem;
+      }
+
+      .footer ul {
+        list-style: none;
+      }
+
+      .footer ul li {
+        margin-bottom: 0.9rem;
+      }
+
+      .footer ul a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 1.1rem;
+        transition: color 0.3s;
+      }
+
+      .footer ul a:hover {
+        color: var(--primary-color);
+      }
+
+      .footer .social-links a {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .footer .social-links i {
+        font-size: 1.3rem;
+      }
+
+      .footer .copyright {
+        text-align: center;
+        margin-top: 4rem;
+        color: var(--text-secondary);
+        font-size: 1rem;
+      }
+
+      .user-info {
+        display: none;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .user-info img {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+      }
+
+      .user-info span {
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+
+      .logout-btn {
+        background: var(--secondary-color);
+        color: var(--card-bg);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        cursor: pointer;
+      }
+
+      .logout-btn:hover {
+        background: #1e40af;
+      }
+
+      @media (max-width: 768px) {
+        .nav-menu {
+          display: none;
+        }
+
+        .hamburger {
+          display: block;
+        }
+
+        .mobile-menu {
+          display: block;
+        }
+
+        .hero {
+          grid-template-columns: 1fr;
+          text-align: center;
+          margin: 3rem auto;
+          gap: 2rem;
+        }
+
+        .hero-text h1 {
+          font-size: 2.2rem;
+        }
+
+        .hero-buttons {
+          justify-content: center;
+        }
+
+        .vocab-trial {
+          max-width: 100%;
+        }
+
+        .vocab-trial input {
+          width: 60%;
+        }
+
+        .section h2 {
+          font-size: 2.2rem;
+        }
+
+        .cta-section {
+          margin: 4rem 1rem;
+          padding: 3rem 1rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .logo-text {
+          font-size: 1.6rem;
+        }
+
+        .hero-text h1 {
+          font-size: 1.9rem;
+        }
+
+        .btn {
+          padding: 0.8rem 2rem;
+        }
+
+        .feature-card {
+          padding: 2rem;
+        }
+
+        .vocab-trial input {
+          width: 50%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div class="nav-container">
+        <div class="logo">
+          <img src="Remove-bg.ai_1734260849847.png" alt="Smart Lex Logo" />
+          <span class="logo-text">Smart Lex</span>
+        </div>
+
+        <div class="hamburger">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+
+        <nav class="nav-menu">
+          <a href="#features"><i class="fas fa-tools"></i> Tính Năng</a>
+          <a href="#roadmap"><i class="fas fa-map-signs"></i> Lộ Trình</a>
+          <a href="#progress"><i class="fas fa-chart-line"></i> Tiến Độ</a>
+          <a href="#testimonials"><i class="fas fa-users"></i> Đánh Giá</a>
+          <div class="nav-cta" id="signInButton">Đăng Nhập</div>
+          <div class="user-info" id="userInfo">
+            <img id="userAvatar" src="" alt="User Avatar" />
+            <span id="userName"></span>
+            <div class="logout-btn" id="logoutButton">Đăng Xuất</div>
+          </div>
+        </nav>
+
+        <div class="mobile-menu">
+          <div class="mobile-nav-links">
+            <a href="#features"><i class="fas fa-tools"></i> Tính Năng</a>
+            <a href="#roadmap"><i class="fas fa-map-signs"></i> Lộ Trình</a>
+            <a href="#progress"><i class="fas fa-chart-line"></i> Tiến Độ</a>
+            <a href="#testimonials"><i class="fas fa-users"></i> Đánh Giá</a>
+            <a href="#" id="mobileSignIn"
+              ><i class="fas fa-sign-in-alt"></i> Đăng Nhập</a
+            >
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="overlay"></div>
+
+    <main>
+      <section class="hero">
+        <div class="hero-text">
+          <h1>
+            Khám Phá Thế Giới Từ Vựng<br />với
+            <span style="color: var(--primary-color)">Smart Lex</span>
+          </h1>
+          <p>
+            Biến từ vựng thành sức mạnh của bạn với công nghệ AI tiên tiến, trò
+            chơi học tập sáng tạo, và lộ trình được thiết kế riêng – từ người
+            mới đến chuyên gia chỉ trong thời gian ngắn!
+          </p>
+          <div class="hero-buttons">
+            <a href="#" class="btn btn-primary">Dùng Thử Ngay</a>
+            <a href="#features" class="btn btn-secondary">Xem Tính Năng</a>
+          </div>
+          <div class="vocab-trial">
+            <h3>Thử Nghiệm Từ Vựng Ngay</h3>
+            <input type="text" placeholder="Nhập từ bạn muốn học..." />
+            <button>Tra Nghĩa</button>
+          </div>
+        </div>
+        <div class="hero-image">
+          <img src="https://placehold.co/600x400" alt="Khám Phá Smart Lex" />
+        </div>
+      </section>
+
+      <section class="section" id="features">
+        <h2>Tính Năng Nổi Bật</h2>
+        <p class="subtitle">
+          Smart Lex mang đến các công cụ hiện đại giúp bạn học từ vựng nhanh
+          chóng, thú vị và hiệu quả hơn bao giờ hết.
+        </p>
+        <div class="features-grid">
+          <div class="feature-card">
+            <i class="fas fa-brain"></i>
+            <h3>AI Cá Nhân Hóa</h3>
+            <p>
+              Phân tích trình độ và thói quen học của bạn để gợi ý từ vựng phù
+              hợp nhất.
+            </p>
+          </div>
+          <div class="feature-card">
+            <i class="fas fa-database"></i>
+            <h3>20.000+ Từ Vựng</h3>
+            <p>
+              Kho từ vựng khổng lồ từ A1 đến C2, bao gồm từ học thuật, giao
+              tiếp, và chuyên ngành.
+            </p>
+          </div>
+          <div class="feature-card">
+            <i class="fas fa-gamepad"></i>
+            <h3>Trò Chơi Học Tập</h3>
+            <p>
+              Ghép từ, đố vui, và mini-game giúp bạn ghi nhớ từ vựng một cách tự
+              nhiên.
+            </p>
+          </div>
+          <div class="feature-card">
+            <i class="fas fa-microphone"></i>
+            <h3>Luyện Phát Âm</h3>
+            <p>
+              Công cụ nhận diện giọng nói giúp bạn phát âm chuẩn như người bản
+              xứ.
+            </p>
+          </div>
+          <div class="feature-card">
+            <i class="fas fa-mobile-alt"></i>
+            <h3>Ứng Dụng Di Động</h3>
+            <p>
+              Học mọi lúc, mọi nơi với ứng dụng trên iOS và Android – đồng bộ
+              tiến độ tức thì.
+            </p>
+          </div>
+          <div class="feature-card">
+            <i class="fas fa-sync-alt"></i>
+            <h3>Spaced Repetition</h3>
+            <p>
+              Phương pháp lặp lại ngắt quãng giúp bạn ghi nhớ từ vựng lâu dài mà
+              không cần nhồi nhét.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="roadmap">
+        <h2>Lộ Trình Học Tập</h2>
+        <p class="subtitle">
+          Đi từ zero đến hero với lộ trình được thiết kế khoa học, phù hợp mọi
+          trình độ.
+        </p>
+        <div class="roadmap-grid">
+          <div class="roadmap-item">
+            <h3>1. Khởi Động (A1-A2)</h3>
+            <p>
+              Làm bài kiểm tra đầu vào, học 300 từ cơ bản qua flashcard và bài
+              tập nghe.
+            </p>
+          </div>
+          <div class="roadmap-item">
+            <h3>2. Nền Tảng (B1)</h3>
+            <p>
+              Mở rộng 1000 từ thông dụng, luyện ngữ cảnh qua câu chuyện và hội
+              thoại.
+            </p>
+          </div>
+          <div class="roadmap-item">
+            <h3>3. Chuyên Sâu (B2)</h3>
+            <p>
+              Học từ vựng theo chủ đề (IELTS, TOEIC), luyện viết và giao tiếp
+              thực tế.
+            </p>
+          </div>
+          <div class="roadmap-item">
+            <h3>4. Thành Thạo (C1-C2)</h3>
+            <p>
+              Thành thạo 5000+ từ nâng cao, tự tin sử dụng trong công việc và
+              học thuật.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="progress">
+        <h2>Theo Dõi Tiến Độ</h2>
+        <p class="subtitle">
+          Xem sự tiến bộ của bạn qua biểu đồ trực quan và nhận gợi ý cải thiện
+          từ AI.
+        </p>
+        <div class="progress-demo">
+          <p>
+            Theo dõi số từ đã học, mức độ thành thạo, và thời gian ôn tập tối ưu
+            – tất cả trong một giao diện thân thiện.
+          </p>
+          <img src="https://placehold.co/800x400" alt="Progress Chart Demo" />
+        </div>
+      </section>
+
+      <section class="section" id="testimonials">
+        <h2>Người Dùng Nói Gì?</h2>
+        <p class="subtitle">
+          Hàng nghìn học viên đã cải thiện từ vựng với Smart Lex – bạn sẽ là
+          người tiếp theo!
+        </p>
+        <div class="testimonials-grid">
+          <div class="testimonial-card">
+            <p>
+              "Tôi đã học được 500 từ chỉ trong 2 tuần nhờ trò chơi và flashcard
+              của Smart Lex. Rất thú vị!"
+            </p>
+            <h4>Nguyễn Minh Anh - Sinh viên</h4>
+          </div>
+          <div class="testimonial-card">
+            <p>
+              "Phát âm của tôi cải thiện rõ rệt nhờ công cụ luyện nói. Ứng dụng
+              này thật sự đáng dùng!"
+            </p>
+            <h4>Trần Hoàng Nam - Nhân viên văn phòng</h4>
+          </div>
+          <div class="testimonial-card">
+            <p>
+              "Lộ trình học rõ ràng và AI gợi ý từ rất thông minh. Tôi đạt IELTS
+              7.0 nhờ Smart Lex."
+            </p>
+            <h4>Lê Thị Hồng - Du học sinh</h4>
+          </div>
+        </div>
+      </section>
+
+      <section class="cta-section">
+        <h2>Bắt Đầu Hành Trình Từ Vựng Ngay Hôm Nay!</h2>
+        <p>
+          Tham gia miễn phí và khám phá cách học từ vựng nhanh nhất, hiệu quả
+          nhất.
+        </p>
+        <a href="#" class="btn">Đăng Ký Ngay</a>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-container">
+        <div>
+          <h3>Smart Lex</h3>
+          <ul>
+            <li><a href="#!">Giới thiệu</a></li>
+            <li><a href="#!">Đội ngũ</a></li>
+            <li><a href="#!">Hỗ trợ</a></li>
+            <li><a href="#!">Blog</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Danh Mục Học</h3>
+          <ul>
+            <li><a href="#!">Từ vựng cơ bản</a></li>
+            <li><a href="#!">IELTS Vocabulary</a></li>
+            <li><a href="#!">TOEIC Vocabulary</a></li>
+            <li><a href="#!">Business English</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Tải Ứng Dụng</h3>
+          <ul>
+            <li><a href="#!">iOS App Store</a></li>
+            <li><a href="#!">Google Play Store</a></li>
+            <li><a href="#!">Hướng dẫn cài đặt</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Kết Nối</h3>
+          <ul class="social-links">
+            <li>
+              <a href="#!"><i class="fab fa-twitter"></i> Twitter</a>
+            </li>
+            <li>
+              <a href="#!"><i class="fab fa-facebook-f"></i> Facebook</a>
+            </li>
+            <li>
+              <a href="#!"><i class="fab fa-instagram"></i> Instagram</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="copyright">© 2025 Smart Lex. Tất cả quyền được bảo lưu.</div>
+    </footer>
+
+    <script type="module">
+      // Import Firebase SDKs
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+      import {
+        getAuth,
+        GoogleAuthProvider,
+        signInWithPopup,
+        signOut,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        setDoc,
+        serverTimestamp,
+      } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyDr7ySnNfcgB2b2u2tPZLc5L4l1FGdjX4A",
+        authDomain: "login-81d5f.firebaseapp.com",
+        projectId: "login-81d5f",
+        storageBucket: "login-81d5f.firebasestorage.app",
+        messagingSenderId: "103989490854",
+        appId: "1:103989490854:web:a4f7c848cdc27d7c11b067",
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      // DOM Elements
+      const hamburger = document.querySelector(".hamburger");
+      const mobileMenu = document.querySelector(".mobile-menu");
+      const overlay = document.querySelector(".overlay");
+      const signInButton = document.getElementById("signInButton");
+      const mobileSignIn = document.getElementById("mobileSignIn");
+      const userInfo = document.getElementById("userInfo");
+      const userAvatar = document.getElementById("userAvatar");
+      const userName = document.getElementById("userName");
+      const logoutButton = document.getElementById("logoutButton");
+
+      // Kiểm tra trạng thái đăng nhập
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          signInButton.style.display = "none";
+          mobileSignIn.style.display = "none";
+          userInfo.style.display = "flex";
+          userAvatar.src = user.photoURL || "https://placehold.co/32x32";
+          userName.textContent = user.displayName || "Người dùng";
+          saveUserData(user);
+        } else {
+          signInButton.style.display = "block";
+          mobileSignIn.style.display = "flex";
+          userInfo.style.display = "none";
+        }
+      });
+
+      // Đăng nhập với Google
+      signInButton.addEventListener("click", () => {
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider)
+          .then((result) => {
+            const user = result.user;
+            alert(`Đăng nhập thành công! Xin chào ${user.displayName}`);
+          })
+          .catch((error) => {
+            alert("Lỗi đăng nhập: " + error.message);
+          });
+      });
+
+      mobileSignIn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider)
+          .then((result) => {
+            const user = result.user;
+            alert(`Đăng nhập thành công! Xin chào ${user.displayName}`);
+          })
+          .catch((error) => {
+            alert("Lỗi đăng nhập: " + error.message);
+          });
+      });
+
+      // Đăng xuất
+      logoutButton.addEventListener("click", () => {
+        signOut(auth)
+          .then(() => {
+            alert("Đã đăng xuất!");
+          })
+          .catch((error) => {
+            alert("Lỗi đăng xuất: " + error.message);
+          });
+      });
+
+      // Lưu dữ liệu người dùng vào Firestore
+      function saveUserData(user) {
+        setDoc(doc(db, "users", user.uid), {
+          name: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+          lastLogin: serverTimestamp(),
+        }).catch((error) => {
+          console.error("Lỗi lưu dữ liệu: ", error);
+        });
+      }
+
+      // Toggle Menu
+      function toggleMenu() {
+        hamburger.classList.toggle("active");
+        mobileMenu.classList.toggle("active");
+        overlay.classList.toggle("active");
+      }
+
+      hamburger.addEventListener("click", toggleMenu);
+      overlay.addEventListener("click", toggleMenu);
+
+      const mobileNavLinks = document.querySelectorAll(".mobile-nav-links a");
+      mobileNavLinks.forEach((link) => {
+        link.addEventListener("click", toggleMenu);
+      });
+
+      window.addEventListener("resize", () => {
+        if (window.innerWidth > 768) {
+          hamburger.classList.remove("active");
+          mobileMenu.classList.remove("active");
+          overlay.classList.remove("active");
+        }
+      });
+
+      // Vocab Trial
+      const trialButton = document.querySelector(".vocab-trial button");
+      trialButton.addEventListener("click", () => {
+        const input = document.querySelector(".vocab-trial input").value;
+        if (input) {
+          alert(
+            `Bạn vừa tra từ: "${input}". Hãy đăng ký để khám phá nghĩa và cách dùng!`
+          );
+        } else {
+          alert("Vui lòng nhập một từ để tra!");
+        }
+      });
+    </script>
+  </body>
+</html>
