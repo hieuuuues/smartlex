@@ -557,6 +557,49 @@
         background: #1e40af;
       }
 
+      .user-progress {
+        margin-top: 1rem;
+        font-size: 1rem;
+        color: var(--text-secondary);
+      }
+
+      .custom-data-section {
+        margin-top: 1rem;
+      }
+
+      .custom-data-section input {
+        padding: 0.5rem;
+        border: 1px solid var(--primary-color);
+        border-radius: 5px;
+        margin-right: 0.5rem;
+      }
+
+      .custom-data-section button {
+        padding: 0.5rem 1rem;
+        background: var(--primary-color);
+        color: var(--card-bg);
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .custom-data-section button:hover {
+        background: var(--secondary-color);
+      }
+
+      .custom-data-section ul {
+        list-style: none;
+        margin-top: 1rem;
+      }
+
+      .custom-data-section li {
+        padding: 0.5rem;
+        background: var(--card-bg);
+        border-radius: 5px;
+        margin-bottom: 0.5rem;
+        box-shadow: var(--shadow);
+      }
+
       @media (max-width: 768px) {
         .nav-menu {
           display: none;
@@ -650,6 +693,12 @@
             <img id="userAvatar" src="" alt="User Avatar" />
             <span id="userName"></span>
             <div class="logout-btn" id="logoutButton">Đăng Xuất</div>
+            <div class="user-progress" id="userProgress"></div>
+            <div class="custom-data-section">
+              <input type="text" id="customInput" placeholder="Nhập thông tin bất kỳ..." />
+              <button id="addCustomButton">Thêm</button>
+              <ul id="customDataList"></ul>
+            </div>
           </div>
         </nav>
 
@@ -659,9 +708,8 @@
             <a href="#roadmap"><i class="fas fa-map-signs"></i> Lộ Trình</a>
             <a href="#progress"><i class="fas fa-chart-line"></i> Tiến Độ</a>
             <a href="#testimonials"><i class="fas fa-users"></i> Đánh Giá</a>
-            <a href="#" id="mobileSignIn"
-              ><i class="fas fa-sign-in-alt"></i> Đăng Nhập</a
-            >
+            <a href="#" id="mobileSignIn"><i class="fas fa-sign-in-alt"></i> Đăng Nhập</a>
+            <a href="#" id="mobileSignUp"><i class="fas fa-user-plus"></i> Đăng Ký</a>
           </div>
         </div>
       </div>
@@ -909,6 +957,7 @@
         doc,
         setDoc,
         getDoc,
+        onSnapshot,
         serverTimestamp,
       } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
@@ -930,33 +979,52 @@
       // DOM Elements
       const signInButton = document.getElementById("signInButton");
       const mobileSignIn = document.getElementById("mobileSignIn");
+      const mobileSignUp = document.getElementById("mobileSignUp");
       const userInfo = document.getElementById("userInfo");
       const userAvatar = document.getElementById("userAvatar");
       const userName = document.getElementById("userName");
+      const userProgress = document.getElementById("userProgress");
       const logoutButton = document.getElementById("logoutButton");
+      const customInput = document.getElementById("customInput");
+      const addCustomButton = document.getElementById("addCustomButton");
+      const customDataList = document.getElementById("customDataList");
 
       const hamburger = document.querySelector(".hamburger");
       const mobileMenu = document.querySelector(".mobile-menu");
       const overlay = document.querySelector(".overlay");
 
+      // Hàm hiển thị danh sách dữ liệu tùy chỉnh
+      function displayCustomData(dataList) {
+        customDataList.innerHTML = ""; // Xóa danh sách cũ
+        dataList.forEach((item) => {
+          const li = document.createElement("li");
+          li.textContent = item;
+          customDataList.appendChild(li);
+        });
+      }
+
       // Kiểm tra trạng thái đăng nhập
-      onAuthStateChanged(auth, async (user) => {
+      onAuthStateChanged(auth, (user) => {
         if (user) {
           signInButton.style.display = "none";
           mobileSignIn.style.display = "none";
+          mobileSignUp.style.display = "none";
           userInfo.style.display = "flex";
           userAvatar.src = user.photoURL || "https://placehold.co/32x32";
           userName.textContent = user.displayName || "Người dùng";
 
-          // Lưu hoặc cập nhật dữ liệu người dùng
-          await saveUserData(user);
+          // Lưu dữ liệu người dùng khi đăng nhập (khởi tạo với danh sách rỗng nếu chưa có)
+          saveUserData(user);
 
-          // Lấy dữ liệu từ Firestore và hiển thị
-          await loadUserData(user.uid);
+          // Lắng nghe dữ liệu thời gian thực
+          listenToUserData(user.uid);
         } else {
           signInButton.style.display = "block";
           mobileSignIn.style.display = "flex";
+          mobileSignUp.style.display = "flex";
           userInfo.style.display = "none";
+          userProgress.textContent = "";
+          customDataList.innerHTML = "";
         }
       });
 
@@ -973,8 +1041,15 @@
           });
       }
 
+      // Hàm xử lý đăng ký (giả định chuyển hướng đến trang đăng ký)
+      function signUp() {
+        alert("Chuyển hướng đến trang đăng ký!");
+        window.location.href = "#"; // Thay bằng URL trang đăng ký nếu có
+      }
+
       signInButton.addEventListener("click", signInWithGoogle);
       mobileSignIn.addEventListener("click", signInWithGoogle);
+      mobileSignUp.addEventListener("click", signUp);
 
       // Đăng xuất
       logoutButton.addEventListener("click", () => {
@@ -988,7 +1063,7 @@
       });
 
       // Lưu dữ liệu người dùng vào Firestore
-      async function saveUserData(user) {
+      async function saveUserData(user, customData = []) {
         try {
           await setDoc(
             doc(db, "users", user.uid),
@@ -997,31 +1072,61 @@
               email: user.email,
               photoURL: user.photoURL,
               lastLogin: serverTimestamp(),
+              customData: customData, // Lưu danh sách dữ liệu tùy chỉnh
             },
             { merge: true }
           );
-
           console.log("Dữ liệu đã được cập nhật!");
         } catch (error) {
           console.error("Lỗi lưu dữ liệu:", error);
         }
       }
 
-      // Đọc dữ liệu người dùng từ Firestore
-      async function loadUserData(userId) {
-        try {
-          const userRef = doc(db, "users", userId);
-          const userSnap = await getDoc(userRef);
-
-          if (userSnap.exists()) {
-            console.log("Dữ liệu Firestore:", userSnap.data());
-          } else {
-            console.log("Không tìm thấy dữ liệu trong Firestore!");
+      // Lắng nghe dữ liệu thời gian thực từ Firestore
+      function listenToUserData(userId) {
+        const userRef = doc(db, "users", userId);
+        onSnapshot(
+          userRef,
+          (userSnap) => {
+            if (userSnap.exists()) {
+              const data = userSnap.data();
+              console.log("Dữ liệu Firestore (thời gian thực):", data);
+              // Hiển thị dữ liệu lên giao diện
+              userName.textContent = data.name || "Người dùng";
+              userAvatar.src = data.photoURL || "https://placehold.co/32x32";
+              userProgress.textContent = `Dữ liệu: ${data.customData ? data.customData.length : 0} mục`;
+              displayCustomData(data.customData || []); // Hiển thị danh sách dữ liệu tùy chỉnh
+            } else {
+              console.log("Không tìm thấy dữ liệu trong Firestore!");
+              userProgress.textContent = "Chưa có dữ liệu.";
+              displayCustomData([]);
+            }
+          },
+          (error) => {
+            console.error("Lỗi tải dữ liệu:", error);
+            userProgress.textContent = "Lỗi tải dữ liệu.";
           }
-        } catch (error) {
-          console.error("Lỗi tải dữ liệu:", error);
-        }
+        );
       }
+
+      // Thêm dữ liệu tùy chỉnh khi nhấn nút
+      addCustomButton.addEventListener("click", async () => {
+        const user = auth.currentUser;
+        if (user && customInput.value.trim()) {
+          // Lấy dữ liệu hiện tại từ Firestore
+          const userRef = doc(db, "users", user.uid);
+          const userSnap = await getDoc(userRef);
+          let currentData = [];
+          if (userSnap.exists()) {
+            currentData = userSnap.data().customData || [];
+          }
+          // Thêm dữ liệu mới vào danh sách
+          currentData.push(customInput.value.trim());
+          // Cập nhật Firestore
+          await saveUserData(user, currentData);
+          customInput.value = ""; // Xóa input sau khi thêm
+        }
+      });
 
       // Toggle menu hamburger
       function toggleMenu() {
