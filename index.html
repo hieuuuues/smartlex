@@ -935,6 +935,10 @@
       const userName = document.getElementById("userName");
       const logoutButton = document.getElementById("logoutButton");
 
+      const hamburger = document.querySelector(".hamburger");
+      const mobileMenu = document.querySelector(".mobile-menu");
+      const overlay = document.querySelector(".overlay");
+
       // Kiểm tra trạng thái đăng nhập
       onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -1018,6 +1022,30 @@
           console.error("Lỗi tải dữ liệu:", error);
         }
       }
+
+      // Toggle menu hamburger
+      function toggleMenu() {
+        hamburger.classList.toggle("active");
+        mobileMenu.classList.toggle("active");
+        overlay.classList.toggle("active");
+      }
+
+      hamburger.addEventListener("click", toggleMenu);
+      overlay.addEventListener("click", toggleMenu);
+
+      const mobileNavLinks = document.querySelectorAll(".mobile-nav-links a");
+      mobileNavLinks.forEach((link) => {
+        link.addEventListener("click", toggleMenu);
+      });
+
+      // Đóng menu khi resize
+      window.addEventListener("resize", () => {
+        if (window.innerWidth > 768) {
+          hamburger.classList.remove("active");
+          mobileMenu.classList.remove("active");
+          overlay.classList.remove("active");
+        }
+      });
     </script>
   </body>
 </html>
