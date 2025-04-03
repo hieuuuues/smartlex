@@ -1004,7 +1004,7 @@
       }
 
       // Kiểm tra trạng thái đăng nhập
-      onAuthStateChanged(auth, (user) => {
+      onAuthStateChanged(auth, async (user) => {
         if (user) {
           signInButton.style.display = "none";
           mobileSignIn.style.display = "none";
@@ -1013,8 +1013,24 @@
           userAvatar.src = user.photoURL || "https://placehold.co/32x32";
           userName.textContent = user.displayName || "Người dùng";
 
-          // Lưu dữ liệu người dùng khi đăng nhập (khởi tạo với danh sách rỗng nếu chưa có)
-          saveUserData(user);
+          // Chỉ lưu thông tin cơ bản khi đăng nhập lần đầu, không ghi đè customData
+          const userRef = doc(db, "users", user.uid);
+          const userSnap = await getDoc(userRef);
+          if (!userSnap.exists()) {
+            await setDoc(userRef, {
+              name: user.displayName,
+              email: user.email,
+              photoURL: user.photoURL,
+              lastLogin: serverTimestamp(),
+              customData: [],
+            });
+          } else {
+            await setDoc(
+              userRef,
+              { lastLogin: serverTimestamp() },
+              { merge: true }
+            ); // Chỉ cập nhật lastLogin
+          }
 
           // Lắng nghe dữ liệu thời gian thực
           listenToUserData(user.uid);
@@ -1062,23 +1078,24 @@
           });
       });
 
-      // Lưu dữ liệu người dùng vào Firestore
-      async function saveUserData(user, customData = []) {
+      // Thêm dữ liệu tùy chỉnh vào Firestore
+      async function addCustomData(user, newData) {
         try {
+          const userRef = doc(db, "users", user.uid);
+          const userSnap = await getDoc(userRef);
+          let currentData = [];
+          if (userSnap.exists()) {
+            currentData = userSnap.data().customData || [];
+          }
+          currentData.push(newData);
           await setDoc(
-            doc(db, "users", user.uid),
-            {
-              name: user.displayName,
-              email: user.email,
-              photoURL: user.photoURL,
-              lastLogin: serverTimestamp(),
-              customData: customData, // Lưu danh sách dữ liệu tùy chỉnh
-            },
+            userRef,
+            { customData: currentData },
             { merge: true }
           );
-          console.log("Dữ liệu đã được cập nhật!");
+          console.log("Dữ liệu đã được thêm!");
         } catch (error) {
-          console.error("Lỗi lưu dữ liệu:", error);
+          console.error("Lỗi thêm dữ liệu:", error);
         }
       }
 
@@ -1095,7 +1112,7 @@
               userName.textContent = data.name || "Người dùng";
               userAvatar.src = data.photoURL || "https://placehold.co/32x32";
               userProgress.textContent = `Dữ liệu: ${data.customData ? data.customData.length : 0} mục`;
-              displayCustomData(data.customData || []); // Hiển thị danh sách dữ liệu tùy chỉnh
+              displayCustomData(data.customData || []);
             } else {
               console.log("Không tìm thấy dữ liệu trong Firestore!");
               userProgress.textContent = "Chưa có dữ liệu.";
@@ -1113,17 +1130,7 @@
       addCustomButton.addEventListener("click", async () => {
         const user = auth.currentUser;
         if (user && customInput.value.trim()) {
-          // Lấy dữ liệu hiện tại từ Firestore
-          const userRef = doc(db, "users", user.uid);
-          const userSnap = await getDoc(userRef);
-          let currentData = [];
-          if (userSnap.exists()) {
-            currentData = userSnap.data().customData || [];
-          }
-          // Thêm dữ liệu mới vào danh sách
-          currentData.push(customInput.value.trim());
-          // Cập nhật Firestore
-          await saveUserData(user, currentData);
+          await addCustomData(user, customInput.value.trim());
           customInput.value = ""; // Xóa input sau khi thêm
         }
       });
